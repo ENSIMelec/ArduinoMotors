@@ -12,7 +12,7 @@
 
 #include <Wire.h>
 #include "PID-1.2.0/PID_v1.h"  // PID
-#iinclude "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
+#include "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
@@ -69,6 +69,8 @@ volatile long countLeft = 0;
 // When set to true, the robot is forced to stop. It is used to halt the robot when the emergency button is pressed or when the match time has ended
 bool stopTheRobot = false;
 
+//La rampe doit se faire dans l'arduino ?? 
+
 int Inramp = 0;   //0 is not, 1 to increase speed, -1 to decrease speed
 int ramp = 2; //define acceleration of the robot
 
@@ -113,11 +115,19 @@ void setup() {
 }
 
 void loop() {
-   
-  //PID for each wheels
+
+    // Mise à jour des compteur de codeurs
+    countRightEncoder();
+    countLeftEncoder();
+
+   // Calcul de la vitesse actuelle
+    LeftCurrentSpeed = (countLeft / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
+    RightCurrentSpeed = (countRight / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
+
+  //PID for each wheels donc correction de la vitesse à la vitesse demandé
   if(PidLeftWheel.Compute() ){
     
-    analogWrite(SPEED_LEFT, LeftCorrectedSpeed);
+    analogWrite(SPEED_LEFT, LeftCorrectedSpeed); //Faut mettre un OrderMOOVE ici nn ? mais j'ai l'impression que la fonction est pas opti dasn notre cas
   }
   if(PidRightWheel.Compute()){
     analogWrite(SPEED_RIGHT, RightCorrectedSpeed);
