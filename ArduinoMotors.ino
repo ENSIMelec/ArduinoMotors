@@ -11,7 +11,8 @@
 */
 
 #include <Wire.h>
-#include "PID-1.2.0/PID_v1.h"  //bibliothèque PID
+#include "PID-1.2.0/PID_v1.h"  // PID
+#iinclude "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
@@ -138,13 +139,13 @@ void initCounters() {
 
 // Function that detects and increament/decreament right wheel direction
 void countRightEncoder() {
-    int8_t direction = !digitalRead(DIRECTION_RIGHT_ENCODER);
+    int8_t direction = !digitalReadFast(DIRECTION_RIGHT_ENCODER);
     countRight += direction ? -1 : 1;
 }
 
 // Function that detects and increament/decreament left wheel direction
 void countLeftEncoder() {
-    int8_t direction = digitalRead(DIRECTION_LEFT_ENCODER);
+    int8_t direction = digitalReadFast(DIRECTION_LEFT_ENCODER);
     countLeft += direction ? -1 : 1;
 }
 
