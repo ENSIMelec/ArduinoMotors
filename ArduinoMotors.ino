@@ -13,6 +13,7 @@
 #include <Wire.h>
 #include "PID-1.2.0/PID_v1.h"  // PID
 #include "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
+#include "" //time interuption
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
@@ -74,8 +75,15 @@ bool stopTheRobot = false;
 int Inramp = 0;   //0 is not, 1 to increase speed, -1 to decrease speed
 int ramp = 2; //define acceleration of the robot
 
-unsigned long timeSpeedR = 0;
-unsigned long timeSpeedL = 0;
+//init variable for PID
+int timeSpeedR = 0;
+int timeSpeedL = 0;
+
+double distanceRight = 0;
+double distanceLeft = 0;
+
+double const distanceByEncoderInpulse = (1/EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
+
 
 void setup() {
 
@@ -117,12 +125,10 @@ void setup() {
 void loop() {
 
    // Calcul de la distance actuelle
-    // DistanceLeft = (countLeft / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
-   // DistanceRight = (countRight / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
+    //
 
   //PID for each wheels donc correction de la vitesse à la vitesse demandé
   if(PidLeftWheel.Compute() ){
-    
     analogWrite(SPEED_LEFT, LeftCorrectedSpeed); //Faut mettre un OrderMOOVE ici nn ? mais j'ai l'impression que la fonction est pas opti dasn notre cas
   }
   if(PidRightWheel.Compute()){
@@ -131,7 +137,10 @@ void loop() {
 
 
   //
-  if()
+  if(pid){
+    LeftCurrentSpeed
+    RightCurrentSpeed
+  }
   
 
 
@@ -143,16 +152,20 @@ void initCounters() {
     countRight = 0;
 }
 
-// Function that detects and increament/decreament right wheel direction
+// Function that detects and increament/decreament right wheel direction and increament/decreament the DistanceRight
 void countRightEncoder() {
     int8_t direction = !digitalReadFast(DIRECTION_RIGHT_ENCODER);
-    countRight += direction ? -1 : 1;
+    short incremental = direction ? -1 : 1;
+    countRight +=  incremental;
+    DistanceRight += incremental*distanceByEncoderInpulse;
 }
 
-// Function that detects and increament/decreament left wheel direction
+// Function that detects and increament/decreament left wheel direction increament/decreament the DistanceLeft
 void countLeftEncoder() {
     int8_t direction = digitalReadFast(DIRECTION_LEFT_ENCODER);
-    countLeft += direction ? -1 : 1;
+    short incremental = direction ? -1 : 1;
+    countLeft +=  incremental;
+    DistanceLeft += incremental*distanceByEncoderInpulse;
 }
 
 // Function that stop the motors
