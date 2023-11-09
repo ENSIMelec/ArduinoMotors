@@ -84,6 +84,19 @@ double distanceLeft = 0;
 
 double const distanceByEncoderInpulse = (1/EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
 
+#define USE_TIMER_1     true
+#define USE_TIMER_2     false
+#define USE_TIMER_3     false
+#define USE_TIMER_4     false
+#define USE_TIMER_5     false
+
+#define TIMER_INTERVAL_MS    10L
+
+void TimerHandler()
+{
+  // Doing something here inside ISR
+}
+
 
 void setup() {
 
@@ -120,6 +133,10 @@ void setup() {
 
     // Add interrupt function
     Wire.onReceive(recv);
+
+    // Interruption lié au temps pour calculer la vitesse tout les x temps
+    ITimer1.init();
+    InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler)
 }
 
 void loop() {
