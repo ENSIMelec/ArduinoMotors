@@ -116,13 +116,9 @@ void setup() {
 
 void loop() {
 
-    // Mise à jour des compteur de codeurs
-    countRightEncoder();
-    countLeftEncoder();
-
-   // Calcul de la vitesse actuelle
-    LeftCurrentSpeed = (countLeft / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
-    RightCurrentSpeed = (countRight / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
+   // Calcul de la distance actuelle
+    // DistanceLeft = (countLeft / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
+   // DistanceRight = (countRight / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
 
   //PID for each wheels donc correction de la vitesse à la vitesse demandé
   if(PidLeftWheel.Compute() ){
