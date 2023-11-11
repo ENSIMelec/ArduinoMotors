@@ -79,8 +79,12 @@ int ramp = 2; //define acceleration of the robot
 int timeSpeedR = 0;
 int timeSpeedL = 0;
 
+// deux variable pour calculer la distance parcouru par les roues
 double distanceRight = 0;
 double distanceLeft = 0;
+
+double old_distanceRight = 0;
+double old_distanceLeft = 0;
 
 double const distanceByEncoderInpulse = (1/EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
 
@@ -95,6 +99,17 @@ double const distanceByEncoderInpulse = (1/EncoderWheelImpulsion) * (2 * PI * Wh
 void TimerHandler()
 {
   // Doing something here inside ISR
+  // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
+  // la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
+  
+    distanceRight += countRight*distanceByEncoderInpulse;
+    distanceLeft += countLeft*distanceByEncoderInpulse;
+
+    RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
+    LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
+
+    old_distanceRight = distanceRight;
+    old_distanceLeft = distanceLeft;
 }
 
 
@@ -136,7 +151,7 @@ void setup() {
 
     // Interruption lié au temps pour calculer la vitesse tout les x temps
     ITimer1.init();
-    InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler)
+    InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
 }
 
 void loop() {
@@ -174,7 +189,6 @@ void countRightEncoder() {
     int8_t direction = !digitalReadFast(DIRECTION_RIGHT_ENCODER);
     short incremental = direction ? -1 : 1;
     countRight +=  incremental;
-    DistanceRight += incremental*distanceByEncoderInpulse;
 }
 
 // Function that detects and increament/decreament left wheel direction increament/decreament the DistanceLeft
@@ -182,7 +196,6 @@ void countLeftEncoder() {
     int8_t direction = digitalReadFast(DIRECTION_LEFT_ENCODER);
     short incremental = direction ? -1 : 1;
     countLeft +=  incremental;
-    DistanceLeft += incremental*distanceByEncoderInpulse;
 }
 
 // Function that stop the motors
