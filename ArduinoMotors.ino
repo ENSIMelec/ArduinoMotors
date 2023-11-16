@@ -13,7 +13,7 @@
 #include <Wire.h>
 #include "PID-1.2.0/PID_v1.h"  // PID
 #include "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
-#include "" //time interuption
+#include "TimerInterrupt-1.8.0/src/TimerInterrupt.h" //time interuption
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
@@ -79,10 +79,38 @@ int ramp = 2; //define acceleration of the robot
 int timeSpeedR = 0;
 int timeSpeedL = 0;
 
+// deux variable pour calculer la distance parcouru par les roues
 double distanceRight = 0;
 double distanceLeft = 0;
 
+double old_distanceRight = 0;
+double old_distanceLeft = 0;
+
 double const distanceByEncoderInpulse = (1/EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
+
+#define USE_TIMER_1     true
+#define USE_TIMER_2     false
+#define USE_TIMER_3     false
+#define USE_TIMER_4     false
+#define USE_TIMER_5     false
+
+#define TIMER_INTERVAL_MS    10L
+
+void TimerHandler()
+{
+  // Doing something here inside ISR
+  // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
+  // la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
+  
+    distanceRight += countRight*distanceByEncoderInpulse;
+    distanceLeft += countLeft*distanceByEncoderInpulse;
+
+    RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
+    LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
+
+    old_distanceRight = distanceRight;
+    old_distanceLeft = distanceLeft;
+}
 
 
 void setup() {
@@ -120,6 +148,10 @@ void setup() {
 
     // Add interrupt function
     Wire.onReceive(recv);
+
+    // Interruption lié au temps pour calculer la vitesse tout les x temps
+    ITimer1.init();
+    InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
 }
 
 void loop() {
@@ -148,7 +180,6 @@ void countRightEncoder() {
     int8_t direction = !digitalReadFast(DIRECTION_RIGHT_ENCODER);
     short incremental = direction ? -1 : 1;
     countRight +=  incremental;
-    DistanceRight += incremental*distanceByEncoderInpulse;
 }
 
 // Function that detects and increament/decreament left wheel direction increament/decreament the DistanceLeft
@@ -156,7 +187,6 @@ void countLeftEncoder() {
     int8_t direction = digitalReadFast(DIRECTION_LEFT_ENCODER);
     short incremental = direction ? -1 : 1;
     countLeft +=  incremental;
-    DistanceLeft += incremental*distanceByEncoderInpulse;
 }
 
 // Function that stop the motors
