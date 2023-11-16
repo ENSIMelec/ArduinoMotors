@@ -135,15 +135,6 @@ void loop() {
     analogWrite(SPEED_RIGHT, RightCorrectedSpeed);
   }
 
-
-  //
-  if(pid){
-    LeftCurrentSpeed
-    RightCurrentSpeed
-  }
-  
-
-
 }
 
 // Initialize the encoder wheel counters
