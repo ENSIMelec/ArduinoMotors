@@ -11,9 +11,9 @@
 */
 
 #include <Wire.h>
-#include <PID_v1.h>                       // PID
+#include <PID_v1.h>                                  // PID
 #include "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
-//#include "TimerInterrupt-1.8.0\src\TimerInterrupt.h" //time interuption
+// #include "TimerInterrupt-1.8.0\src\TimerInterrupt.h" //time interuption
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
@@ -57,9 +57,18 @@
 
 // Variable pour le PID
 double LeftCurrentSpeed, LeftCorrectedSpeed, LeftDesireSpeed, RightCurrentSpeed, RightCorrectedSpeed, RightDesireSpeed, DesiredAngle, CurrentAngle;
+// deux variable pour calculer la distance parcouru par les roues
+double distanceRight = 0;
+double distanceLeft = 0;
+
+double old_distanceRight = 0;
+double old_distanceLeft = 0;
+
 // Specify the links and initial tuning parameters
-PID PidLeftWheel(&LeftCurrentSpeed, &LeftCorrectedSpeed, &LeftDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
-PID PidRightWheel(&RightCurrentSpeed, &RightCorrectedSpeed, &RightDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
+PID PidSpeedLeftWheel(&LeftCurrentSpeed, &LeftCorrectedSpeed, &LeftDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
+PID PidSpeedRightWheel(&RightCurrentSpeed, &RightCorrectedSpeed, &RightDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
+PID PidAngle(&CurrentAngle, &DesiredAngle, &DesiredAngle, 1, 1, 1, P_ON_M, DIRECT);
+PID PidPosition(&CurrentAngle, &DesiredAngle, &DesiredAngle, 1, 1, 1, P_ON_M, DIRECT);
 
 // Encoder wheels counters
 volatile long countRight = 0;
@@ -77,14 +86,7 @@ int ramp = 2;   // define acceleration of the robot
 int timeSpeedR = 0;
 int timeSpeedL = 0;
 
-// deux variable pour calculer la distance parcouru par les roues
-double distanceRight = 0;
-double distanceLeft = 0;
-
-double old_distanceRight = 0;
-double old_distanceLeft = 0;
-
-double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
+double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
 
 #define USE_TIMER_1 true
 #define USE_TIMER_2 false
@@ -94,24 +96,25 @@ double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * 
 
 #define TIMER_INTERVAL_MS 10L
 
- /*                                                                         void
-                                                                          TimerHandler()
+                                        /*                                                                         void
+                                        TimerHandler()
 {
-    // Doing something here inside ISR
-    // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
-    // la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
+// Doing something here inside ISR
+// dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
+// la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
 
-    distanceRight += countRight * distanceByEncoderInpulse;
-    distanceLeft += countLeft * distanceByEncoderInpulse;
+distanceRight += countRight * distanceByEncoderInpulse;
+distanceLeft += countLeft * distanceByEncoderInpulse;
 
-    RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
-    LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
+RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
+LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
 
-    old_distanceRight = distanceRight;
-    old_distanceLeft = distanceLeft;
+old_distanceRight = distanceRight;
+old_distanceLeft = distanceLeft;
 }
 */
-void setup()
+                                        void
+                                        setup()
 {
 
 #ifdef DEBUG
@@ -137,8 +140,8 @@ void setup()
     attachInterrupt(digitalPinToInterrupt(PULSE_LEFT_ENCODER), countLeftEncoder, FALLING);
 
     // Interruption lié au temps pour calculer la vitesse tout les x temps
-    //ITimer1.init();
-    //InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
+    // ITimer1.init();
+    // InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
 
     // Make sure the motors are stopped
     stop();
@@ -150,11 +153,10 @@ void setup()
     Wire.onRequest(sendData);
 
     // Add interrupt function
-   // Wire.onReceive(recv);
+    // Wire.onReceive(recv);
 
-   PidLeftWheel.SetMode(AUTOMATIC);
-   PidRightWheel.SetMode(AUTOMATIC);
-
+    PidLeftWheel.SetMode(AUTOMATIC);
+    PidRightWheel.SetMode(AUTOMATIC);
 }
 
 void loop()
