@@ -5,6 +5,8 @@ https://prod.liveshare.vsengsaas.visualstudio.com/join?B53B1792FA29001D2FA257100
 
 For STM32 board in Arduino, add https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json in Additional Boards Managers URLs
 
+https://github.com/khoih-prog/STM32_TimerInterrupt/tree/main
+
 ## Table of contents
 
 - [Quick start](#quick-start)
