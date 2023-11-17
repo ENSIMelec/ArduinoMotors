@@ -12,8 +12,8 @@
 
 #include <Wire.h>
 #include <PID_v1.h>                                  // PID
-#include "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
-// #include "TimerInterrupt-1.8.0\src\TimerInterrupt.h" //time interuption
+#include <digitalWriteFast.h> // Read and Write Faster than Arduino
+#include <STM32TimerInterrupt.h> //time interuption
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
