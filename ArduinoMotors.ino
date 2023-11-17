@@ -86,7 +86,7 @@ int ramp = 2;   // define acceleration of the robot
 int timeSpeedR = 0;
 int timeSpeedL = 0;
 
-double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
+double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
 
 #define USE_TIMER_1 true
 #define USE_TIMER_2 false
@@ -96,8 +96,8 @@ double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * 
 
 #define TIMER_INTERVAL_MS 10L
 
-                                        /*                                                                         void
-                                        TimerHandler()
+/*                                                                         void
+TimerHandler()
 {
 // Doing something here inside ISR
 // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
@@ -113,8 +113,7 @@ old_distanceRight = distanceRight;
 old_distanceLeft = distanceLeft;
 }
 */
-                                        void
-                                        setup()
+void setup()
 {
 
 #ifdef DEBUG
@@ -216,21 +215,6 @@ uint8_t computeDirection(int8_t speed)
                                          : 0;
 }
 
-// Function that send an order to the motors
-// Speed is between -128 and 127
-void orderMove(int8_t speedRight, int8_t speedLeft)
-{ // TODO : fix inversion
-    if (stopTheRobot)
-    {
-        stop();
-    }
-    else
-    {
-        orderLeft(computeDirection(speedLeft), abs(speedLeft));
-        orderRight(computeDirection(speedRight), abs(speedRight));
-    }
-}
-
 // Function that send an order to the left motor
 void orderLeft(uint8_t direction, uint8_t speed)
 {
@@ -274,6 +258,21 @@ void orderRight(uint8_t direction, uint8_t speed)
         digitalWrite(DIRECTION_RIGHT, LOW);
         analogWrite(SPEED_RIGHT, speed);
         break;
+    }
+}
+
+// Function that send an order to the motors
+// Speed is between -128 and 127
+void orderMove(int8_t speedRight, int8_t speedLeft)
+{ // TODO : fix inversion
+    if (stopTheRobot)
+    {
+        stop();
+    }
+    else
+    {
+        orderLeft(computeDirection(speedLeft), abs(speedLeft));
+        orderRight(computeDirection(speedRight), abs(speedRight));
     }
 }
 
