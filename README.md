@@ -2,6 +2,9 @@
 program to upload to arduino nano board to use motors and encoders wheels. The program has already speed, position, and rotation asservissement
 https://prod.liveshare.vsengsaas.visualstudio.com/join?B53B1792FA29001D2FA25710084CA11EF164
 
+
+For STM32 board in Arduino, add https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json in Additional Boards Managers URLs
+
 ## Table of contents
 
 - [Quick start](#quick-start)

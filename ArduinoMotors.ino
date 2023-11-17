@@ -11,9 +11,9 @@
 */
 
 #include <Wire.h>
-#include "PID-1.2.0/PID_v1.h"  // PID
+#include <PID_v1.h>                       // PID
 #include "digitalWriteFast-1.2.0/digitalWriteFast.h" // Read and Write Faster than Arduino
-#include "TimerInterrupt-1.8.0/src/TimerInterrupt.h" //time interuption
+//#include "TimerInterrupt-1.8.0\src\TimerInterrupt.h" //time interuption
 
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
@@ -44,24 +44,22 @@
 #define RIGHT 1
 
 // Bytes used for communication with the Raspberry Pi
-#define START_BYTE  0x25
-#define STOP_BYTE   0x5A
+#define START_BYTE 0x25
+#define STOP_BYTE 0x5A
 
 #define INIT_COUNTERS 0xA1
 #define EMERGENCY_STOP 0xA2
 
-
 #define EncoderWheelDiameter 35
 #define EncoderWheelImpulsion 512
 #define WheelDiameter 63
-#define MotorMaxSpeed 5 //hz
+#define MotorMaxSpeed 5 // hz
 
-
-//Variable pour le PID
-double LeftCurrentSpeed,LeftCorrectedSpeed,LeftDesireSpeed,RightCurrentSpeed,RightCorrectedSpeed,RightDesireSpeed;
-//Specify the links and initial tuning parameters
-PID PidLeftWheel(&LeftCurrentSpeed, &LeftCorrectedSpeed, &LeftDesireSpeed,1,1,1,P_ON_M, DIRECT);
-PID PidRightWheel(&RightCurrentSpeed, &RightCorrectedSpeed, &RightDesireSpeed,1,1,1,P_ON_M, DIRECT);
+// Variable pour le PID
+double LeftCurrentSpeed, LeftCorrectedSpeed, LeftDesireSpeed, RightCurrentSpeed, RightCorrectedSpeed, RightDesireSpeed, DesiredAngle, CurrentAngle;
+// Specify the links and initial tuning parameters
+PID PidLeftWheel(&LeftCurrentSpeed, &LeftCorrectedSpeed, &LeftDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
+PID PidRightWheel(&RightCurrentSpeed, &RightCorrectedSpeed, &RightDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
 
 // Encoder wheels counters
 volatile long countRight = 0;
@@ -70,12 +68,12 @@ volatile long countLeft = 0;
 // When set to true, the robot is forced to stop. It is used to halt the robot when the emergency button is pressed or when the match time has ended
 bool stopTheRobot = false;
 
-//La rampe doit se faire dans l'arduino ?? 
+// La rampe doit se faire dans l'arduino ??
 
-int Inramp = 0;   //0 is not, 1 to increase speed, -1 to decrease speed
-int ramp = 2; //define acceleration of the robot
+int Inramp = 0; // 0 is not, 1 to increase speed, -1 to decrease speed
+int ramp = 2;   // define acceleration of the robot
 
-//init variable for PID
+// init variable for PID
 int timeSpeedR = 0;
 int timeSpeedL = 0;
 
@@ -86,24 +84,25 @@ double distanceLeft = 0;
 double old_distanceRight = 0;
 double old_distanceLeft = 0;
 
-double const distanceByEncoderInpulse = (1/EncoderWheelImpulsion) * (2 * PI * WheelDiameter)
+double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * WheelDiameter);
 
-#define USE_TIMER_1     true
-#define USE_TIMER_2     false
-#define USE_TIMER_3     false
-#define USE_TIMER_4     false
-#define USE_TIMER_5     false
+#define USE_TIMER_1 true
+#define USE_TIMER_2 false
+#define USE_TIMER_3 false
+#define USE_TIMER_4 false
+#define USE_TIMER_5 false
 
-#define TIMER_INTERVAL_MS    10L
+#define TIMER_INTERVAL_MS 10L
 
-void TimerHandler()
+ /*                                                                         void
+                                                                          TimerHandler()
 {
-  // Doing something here inside ISR
-  // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
-  // la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
-  
-    distanceRight += countRight*distanceByEncoderInpulse;
-    distanceLeft += countLeft*distanceByEncoderInpulse;
+    // Doing something here inside ISR
+    // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
+    // la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
+
+    distanceRight += countRight * distanceByEncoderInpulse;
+    distanceLeft += countLeft * distanceByEncoderInpulse;
 
     RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
     LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
@@ -111,9 +110,9 @@ void TimerHandler()
     old_distanceRight = distanceRight;
     old_distanceLeft = distanceLeft;
 }
-
-
-void setup() {
+*/
+void setup()
+{
 
 #ifdef DEBUG
     Serial.begin(9600);
@@ -132,10 +131,14 @@ void setup() {
     pinMode(DIRECTION_RIGHT_ENCODER, INPUT);
     pinMode(DIRECTION_LEFT_ENCODER, INPUT);
 
-    digitalWrite(POWER_ENABLE, HIGH);   // enable motor power
+    digitalWrite(POWER_ENABLE, HIGH); // enable motor power
 
     attachInterrupt(digitalPinToInterrupt(PULSE_RIGHT_ENCODER), countRightEncoder, FALLING);
     attachInterrupt(digitalPinToInterrupt(PULSE_LEFT_ENCODER), countLeftEncoder, FALLING);
+
+    // Interruption lié au temps pour calculer la vitesse tout les x temps
+    //ITimer1.init();
+    //InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
 
     // Make sure the motors are stopped
     stop();
@@ -147,50 +150,56 @@ void setup() {
     Wire.onRequest(sendData);
 
     // Add interrupt function
-    Wire.onReceive(recv);
+   // Wire.onReceive(recv);
 
-    // Interruption lié au temps pour calculer la vitesse tout les x temps
-    ITimer1.init();
-    InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
+   PidLeftWheel.SetMode(AUTOMATIC);
+   PidRightWheel.SetMode(AUTOMATIC);
+
 }
 
-void loop() {
+void loop()
+{
 
-   // Calcul de la distance actuelle
+    // Calcul de la distance actuelle
     //
 
-  //PID for each wheels donc correction de la vitesse à la vitesse demandé
-  if(PidLeftWheel.Compute() ){
-    analogWrite(SPEED_LEFT, LeftCorrectedSpeed); //Faut mettre un OrderMOOVE ici nn ? mais j'ai l'impression que la fonction est pas opti dasn notre cas
-  }
-  if(PidRightWheel.Compute()){
-    analogWrite(SPEED_RIGHT, RightCorrectedSpeed);
-  }
-
+    // PID for each wheels donc correction de la vitesse à la vitesse demandé
+    if (PidLeftWheel.Compute())
+    {
+        analogWrite(SPEED_LEFT, LeftCorrectedSpeed); // Faut mettre un OrderMOOVE ici nn ? mais j'ai l'impression que la fonction est pas opti dasn notre cas
+    }
+    if (PidRightWheel.Compute())
+    {
+        analogWrite(SPEED_RIGHT, RightCorrectedSpeed);
+    }
 }
 
 // Initialize the encoder wheel counters
-void initCounters() {
+void initCounters()
+{
     countLeft = 0;
     countRight = 0;
 }
 
 // Function that detects and increament/decreament right wheel direction and increament/decreament the DistanceRight
-void countRightEncoder() {
+void countRightEncoder()
+{
     int8_t direction = !digitalReadFast(DIRECTION_RIGHT_ENCODER);
     short incremental = direction ? -1 : 1;
-    countRight +=  incremental;
+    countRight += incremental;
 }
 
 // Function that detects and increament/decreament left wheel direction increament/decreament the DistanceLeft
-void countLeftEncoder() {
+void countLeftEncoder()
+{
     int8_t direction = digitalReadFast(DIRECTION_LEFT_ENCODER);
     short incremental = direction ? -1 : 1;
-    countLeft +=  incremental;
+    countLeft += incremental;
 }
 
 // Function that stop the motors
-void stop() {
+void stop()
+{
     analogWrite(SPEED_LEFT, LOW);
     digitalWrite(DIRECTION_LEFT, LOW);
 
@@ -199,25 +208,32 @@ void stop() {
 }
 
 // Function that returns the direction depending on the sign of the speed
-uint8_t computeDirection(int8_t speed) {
-    return (speed < 0) ? 2 : (speed > 0) ? 1 : 0;
+uint8_t computeDirection(int8_t speed)
+{
+    return (speed < 0) ? 2 : (speed > 0) ? 1
+                                         : 0;
 }
 
-// Function that send an order to the motors 
+// Function that send an order to the motors
 // Speed is between -128 and 127
-void orderMove(int8_t speedRight, int8_t speedLeft) { // TODO : fix inversion
-    if (stopTheRobot) {
+void orderMove(int8_t speedRight, int8_t speedLeft)
+{ // TODO : fix inversion
+    if (stopTheRobot)
+    {
         stop();
     }
-    else {
+    else
+    {
         orderLeft(computeDirection(speedLeft), abs(speedLeft));
         orderRight(computeDirection(speedRight), abs(speedRight));
     }
 }
 
 // Function that send an order to the left motor
-void orderLeft(uint8_t direction, uint8_t speed) {
-    switch (direction) {
+void orderLeft(uint8_t direction, uint8_t speed)
+{
+    switch (direction)
+    {
     case 0:
         // Stopping motors
         digitalWrite(DIRECTION_LEFT, LOW);
@@ -237,8 +253,10 @@ void orderLeft(uint8_t direction, uint8_t speed) {
 }
 
 // Function that send an order to the right motor
-void orderRight(uint8_t direction, uint8_t speed) {
-    switch (direction) {
+void orderRight(uint8_t direction, uint8_t speed)
+{
+    switch (direction)
+    {
     case 0:
         // Stopping motors
         digitalWrite(DIRECTION_RIGHT, LOW);
@@ -258,7 +276,8 @@ void orderRight(uint8_t direction, uint8_t speed) {
 }
 
 // Function that sends data over I2C
-void sendData() {
+void sendData()
+{
     Wire.write(START_BYTE);
 
     Wire.write(countLeft);
@@ -274,26 +293,33 @@ void sendData() {
     Wire.write(STOP_BYTE);
 }
 
+/*
 // Function that receive the bytes from the I2C
-void recv(int numBytes) {
-    if (numBytes == 4) {
+void recv(int numBytes)
+{
+    if (numBytes == 4)
+    {
         int8_t speed_left = Wire.read() | (Wire.read() << 8);
         int8_t speed_right = Wire.read() | (Wire.read() << 8);
 
         orderMove(speed_right, speed_left);
     }
 
-    else (numBytes == 2) {
-
-    }
-    else if (numBytes == 1) {
+    else
+        (numBytes == 2)
+        {
+        }
+    else if (numBytes == 1)
+    {
         uint8_t data = Wire.read();
-        if (data == INIT_COUNTERS) {
+        if (data == INIT_COUNTERS)
+        {
             initCounters();
             // Serial.println("Initialisation des compteurs!!");
             stopTheRobot = false;
         }
-        else if (data == EMERGENCY_STOP) {
+        else if (data == EMERGENCY_STOP)
+        {
             stop();
             // Serial.println("Emergency button stop is pressed!!");
             stopTheRobot = true;
@@ -301,5 +327,7 @@ void recv(int numBytes) {
     }
 
     Wire.flush();
-    while (Wire.available()) Wire.read();
+    while (Wire.available())
+        Wire.read();
 }
+*/
