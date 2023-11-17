@@ -155,8 +155,8 @@ old_distanceLeft = distanceLeft;
     // Add interrupt function
     // Wire.onReceive(recv);
 
-    PidLeftWheel.SetMode(AUTOMATIC);
-    PidRightWheel.SetMode(AUTOMATIC);
+    PidSpeedLeftWheel.SetMode(AUTOMATIC);
+    PidSpeedRightWheel.SetMode(AUTOMATIC);
 }
 
 void loop()
@@ -166,11 +166,11 @@ void loop()
     //
 
     // PID for each wheels donc correction de la vitesse à la vitesse demandé
-    if (PidLeftWheel.Compute())
+    if (PidSpeedLeftWheel.Compute())
     {
         analogWrite(SPEED_LEFT, LeftCorrectedSpeed); // Faut mettre un OrderMOOVE ici nn ? mais j'ai l'impression que la fonction est pas opti dasn notre cas
     }
-    if (PidRightWheel.Compute())
+    if (PidSpeedRightWheel.Compute())
     {
         analogWrite(SPEED_RIGHT, RightCorrectedSpeed);
     }
