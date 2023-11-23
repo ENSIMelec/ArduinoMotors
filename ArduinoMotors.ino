@@ -95,6 +95,7 @@ double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * 
 #define USE_TIMER_5 false
 
 #define TIMER_INTERVAL_MS 100L
+STM32Timer ITimer(TIM1);
 
 void TimerHandler()
 {
@@ -155,10 +156,10 @@ void setup()
     PidSpeedLeftWheel.SetMode(AUTOMATIC);
     PidSpeedRightWheel.SetMode(AUTOMATIC);
 
-    LeftDesiredSpeed = 50;
-    RightDesiredSpeed = 50;
+    LeftDesireSpeed = 50;
+    RightDesireSpeed = 50;
 
-    orderMove(LeftDesiredSpeed, RightDesiredSpeed);
+    orderMove(LeftDesireSpeed, RightDesireSpeed);
 }
 
 void loop()
