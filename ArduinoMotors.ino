@@ -159,7 +159,7 @@ void setup()
     LeftDesireSpeed = 50;
     RightDesireSpeed = 50;
 
-    orderMove(LeftDesireSpeed, RightDesireSpeed);
+    orderMove(RightDesireSpeed, LeftDesireSpeed);
 }
 
 void loop()
