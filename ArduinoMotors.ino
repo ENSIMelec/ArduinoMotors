@@ -95,6 +95,7 @@ double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * 
 #define USE_TIMER_5 false
 
 #define TIMER_INTERVAL_MS 100L
+STM32Timer ITimer(TIM1);
 
 void TimerHandler()
 {
