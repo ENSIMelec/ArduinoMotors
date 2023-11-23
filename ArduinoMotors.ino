@@ -63,6 +63,8 @@ double distanceLeft = 0;
 
 double old_distanceRight = 0;
 double old_distanceLeft = 0;
+// variable pour stocker l'angler dans lequel le robot est
+double angle = 0;
 
 // Specify the links and initial tuning parameters
 PID PidSpeedLeftWheel(&LeftCurrentSpeed, &LeftCorrectedSpeed, &LeftDesireSpeed, 1, 1, 1, P_ON_M, DIRECT);
@@ -108,6 +110,15 @@ distanceLeft += countLeft * distanceByEncoderInpulse;
 
 RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
 LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
+
+// mise à jour de l'offset pour savoir ou se trouve le point de rotation du robot
+double offsetRight = distanceBetweenWheels * (vitesseGauche / (vitesseDroite + vitesseGauche));
+double offsetLeft = distanceBetweenWheels * (vitesseDroite / (vitesseDroite + vitesseGauche));
+
+// calcul de l'angle à la suite de l'offset 
+double angleDroite = distanceRight / (distanceBetweenWheels + offsetRight);
+double angleGauche = distanceLeft / (distanceBetweenWheels + offsetLeft);
+angle = (angleDroite + angleGauche) / 2;
 
 old_distanceRight = distanceRight;
 old_distanceLeft = distanceLeft;
