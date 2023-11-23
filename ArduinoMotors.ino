@@ -11,8 +11,8 @@
 */
 
 #include <Wire.h>
-#include <PID_v1.h>                                  // PID
-#include <digitalWriteFast.h> // Read and Write Faster than Arduino
+#include <PID_v1.h>              // PID
+#include <digitalWriteFast.h>    // Read and Write Faster than Arduino
 #include <STM32TimerInterrupt.h> //time interuption
 
 // Comment or uncomment to activate
@@ -82,7 +82,7 @@ bool stopTheRobot = false;
 int Inramp = 0; // 0 is not, 1 to increase speed, -1 to decrease speed
 int ramp = 2;   // define acceleration of the robot
 
-// init variable for PID
+// init variable for PID²
 int timeSpeedR = 0;
 int timeSpeedL = 0;
 
@@ -94,25 +94,24 @@ double const distanceByEncoderInpulse = (1 / EncoderWheelImpulsion) * (2 * PI * 
 #define USE_TIMER_4 false
 #define USE_TIMER_5 false
 
-#define TIMER_INTERVAL_MS 10L
+#define TIMER_INTERVAL_MS 100L
 
-/*                                                                         void
-TimerHandler()
+void TimerHandler()
 {
-// Doing something here inside ISR
-// dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
-// la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
+    // Doing something here inside ISR
+    // dans cette fonction on va calculer la vitesse actuelle des roues et la distance parcouru par les roues
+    // la vitesse corrigée est calculer grace au PID par rapport à la vitesse desiré et la vitesse actuelle
 
-distanceRight += countRight * distanceByEncoderInpulse;
-distanceLeft += countLeft * distanceByEncoderInpulse;
+    distanceRight += countRight * distanceByEncoderInpulse;
+    distanceLeft += countLeft * distanceByEncoderInpulse;
 
-RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
-LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
+    RightCurrentSpeed = (distanceRight - old_distanceRight) / TIMER_INTERVAL_MS;
+    LeftCurrentSpeed = (distanceLeft - old_distanceLeft) / TIMER_INTERVAL_MS;
 
-old_distanceRight = distanceRight;
-old_distanceLeft = distanceLeft;
+    old_distanceRight = distanceRight;
+    old_distanceLeft = distanceLeft;
 }
-*/
+
 void setup()
 {
 
@@ -139,8 +138,7 @@ void setup()
     attachInterrupt(digitalPinToInterrupt(PULSE_LEFT_ENCODER), countLeftEncoder, FALLING);
 
     // Interruption lié au temps pour calculer la vitesse tout les x temps
-    // ITimer1.init();
-    // InterruptTimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler);
+    ITimer.attachInterruptInterval(TIMER_INTERVAL_MS * 1000, TimerHandler);
 
     // Make sure the motors are stopped
     stop();
