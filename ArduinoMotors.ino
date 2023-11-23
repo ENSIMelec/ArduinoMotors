@@ -154,6 +154,11 @@ void setup()
 
     PidSpeedLeftWheel.SetMode(AUTOMATIC);
     PidSpeedRightWheel.SetMode(AUTOMATIC);
+
+    LeftDesiredSpeed = 50;
+    RightDesiredSpeed = 50;
+
+    orderMove(LeftDesiredSpeed, RightDesiredSpeed);
 }
 
 void loop()
