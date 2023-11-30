@@ -18,7 +18,7 @@
 // Comment or uncomment to activate
 #define DEBUG // Used to print informations to the serial port
 
-#define POWER_ENABLE 11 // pin to enable motor power
+#define POWER_ENABLE 2 // pin to enable motor power
 
 // Left motor
 #define SPEED_LEFT 6     // PWM pin for controlling speed of left motor
@@ -134,7 +134,7 @@ void setup()
     pinMode(DIRECTION_LEFT_ENCODER, INPUT);
 
     pinMode(POWER_ENABLE, OUTPUT);
-    digitalWrite(POWER_ENABLE, HIGH); // enable motor power
+    analogWrite(POWER_ENABLE, 255); // enable motor power
 
     attachInterrupt(digitalPinToInterrupt(PULSE_RIGHT_ENCODER), countRightEncoder, FALLING);
     attachInterrupt(digitalPinToInterrupt(PULSE_LEFT_ENCODER), countLeftEncoder, FALLING);
