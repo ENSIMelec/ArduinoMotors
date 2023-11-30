@@ -133,6 +133,7 @@ void setup()
     pinMode(DIRECTION_RIGHT_ENCODER, INPUT);
     pinMode(DIRECTION_LEFT_ENCODER, INPUT);
 
+    pinMode(POWER_ENABLE, OUTPUT);
     digitalWrite(POWER_ENABLE, HIGH); // enable motor power
 
     attachInterrupt(digitalPinToInterrupt(PULSE_RIGHT_ENCODER), countRightEncoder, FALLING);
@@ -145,20 +146,18 @@ void setup()
     stop();
 
     // Start I2C
-    Wire.begin(ADDR_I2C);
+    // Wire.begin(ADDR_I2C);
 
     // On request function
-    Wire.onRequest(sendData);
+    // Wire.onRequest(sendData);
 
     // Add interrupt function
     // Wire.onReceive(recv);
 
-    PidSpeedLeftWheel.SetMode(AUTOMATIC);
-    PidSpeedRightWheel.SetMode(AUTOMATIC);
-
     LeftDesireSpeed = 50;
     RightDesireSpeed = 50;
-
+    PidSpeedLeftWheel.SetMode(AUTOMATIC);
+    PidSpeedRightWheel.SetMode(AUTOMATIC);
     orderMove(RightDesireSpeed, LeftDesireSpeed);
 }
 
@@ -167,7 +166,7 @@ void loop()
 
     // Calcul de la distance actuelle
     //
-
+    /*
     // PID for each wheels donc correction de la vitesse à la vitesse demandé
     if (PidSpeedLeftWheel.Compute())
     {
@@ -176,7 +175,7 @@ void loop()
     if (PidSpeedRightWheel.Compute())
     {
         analogWrite(SPEED_RIGHT, RightCorrectedSpeed);
-    }
+    }*/
 }
 
 // Initialize the encoder wheel counters
